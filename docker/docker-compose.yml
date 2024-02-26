@@ -1,0 +1,53 @@
+version: '3'
+
+services:
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto
+    volumes:
+    - "/home/ddalpra/docker/volume/mosquitto/config:/mosquitto/config"
+    - "/home/ddalpra/docker/volume/mosquitto/log:/mosquitto/log"
+    - "/home/ddalpra/docker/volume/mosquitto/data/:/mosquitto/data"
+    restart: always
+    ports:
+    - "1883:1883" 
+  srv-db:
+      container_name: srv-psg
+      image: postgres
+      volumes:
+        - /home/ddalpra/docker/volume/srv-db:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: app
+        POSTGRES_USER: admps
+        POSTGRES_PASSWORD: admpwd
+      ports:
+        - '5433:5432'
+  postgres:
+      image: postgres
+      volumes:
+        - /home/ddalpra/docker/volume/postgres:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+      ports:
+        - '5432:5432'
+  keycloak:
+      image: quay.io/keycloak/keycloak
+      command: 
+        - start-dev 
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: Pa55w0rd
+        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+        #JDBC_PARAMS: "ssl=true"
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
