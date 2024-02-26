@@ -1,0 +1,6 @@
+[submodule "dd0jt"]
+	path = dd0jt
+	url = https://github.com/ddalpra/dd0jt.git
+[submodule "dd34pp"]
+	path = dd34pp
+	url = https://github.com/ddalpra/dd34pp.git
