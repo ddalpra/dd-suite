@@ -9,7 +9,7 @@ services:
     - "/home/ddalpra/docker/volume/mosquitto/data/:/mosquitto/data"
     restart: always
     ports:
-    - "1883:1883" 
+    - "1886:1883" 
   dd34-db:
       container_name: dd34-db
       image: postgres
@@ -32,7 +32,8 @@ services:
         POSTGRES_PASSWORD: admpwd
       ports:
         - '5434:5432'
-  postgres:
+  pos-db:
+      container_name: pos-db
       image: postgres
       volumes:
         - /home/ddalpra/docker/volume/postgres:/var/lib/postgresql/data
@@ -42,13 +43,14 @@ services:
         POSTGRES_PASSWORD: password
       ports:
         - '5432:5432'
-  keycloak:
+  key-srv:
+      container_name: key-srv
       image: quay.io/keycloak/keycloak
       command: 
         - start-dev 
       environment:
         DB_VENDOR: POSTGRES
-        DB_ADDR: postgres
+        DB_ADDR: pos-db
         DB_DATABASE: keycloak
         DB_USER: keycloak
         DB_SCHEMA: public
@@ -60,5 +62,17 @@ services:
       ports:
         - 8080:8080
       depends_on:
-        - postgres
+        - pos-db
+  amq-srv:
+      container_name: amq-srv
+      image: quay.io/artemiscloud/activemq-artemis-broker
+      ports:
+        - "5672:5672"
+        - "61616:61616"
+        - "1883:1883"
+      volumes:
+        - ./broker/broker.xml:/opt/amq/conf/broker.xml
+      environment:
+        AMQ_USER: "admin"
+        AMQ_PASSWORD: "admin"
         
